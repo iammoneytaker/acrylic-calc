@@ -1,113 +1,208 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+import React, { useState } from 'react';
+import { Input } from './ui/input';
+import { Select } from './ui/select';
+import { Button } from './ui/button';
+import { VisualFeedback } from './components/VisualFeedback';
+import {
+  calculateDimensions,
+  selectOptimalSheet,
+  calculateTotalCost,
+} from './utils/calculation';
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+const thicknessOptions = [
+  { value: 1.3, label: '1.3T' },
+  { value: 1.5, label: '1.5T' },
+  { value: 1.8, label: '1.8T' },
+  { value: 2, label: '2T' },
+  { value: 2.5, label: '2.5T' },
+  { value: 3, label: '3T' },
+  { value: 4, label: '4T' },
+  { value: 5, label: '5T' },
+  { value: 6, label: '6T' },
+  { value: 7, label: '7T' },
+  { value: 8, label: '8T' },
+  { value: 9, label: '9T' },
+  { value: 10, label: '10T' },
+  { value: 12, label: '12T' },
+  { value: 15, label: '15T' },
+  { value: 18, label: '18T' },
+  { value: 20, label: '20T' },
+  { value: 25, label: '25T' },
+  { value: 30, label: '30T' },
+];
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+const laborCostFactorOptions = [
+  { value: 1, label: '1배 (기본)' },
+  { value: 1.5, label: '1.5배' },
+  { value: 1.8, label: '1.8배' },
+  { value: 2, label: '2배' },
+];
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+interface ResultType {
+  dimensions: { [key: string]: { width: number; height: number } };
+  optimalSheet: {
+    width: number;
+    height: number;
+    name: string;
+    price: number;
+  };
+  costPerBox: number;
+  totalMaterialCost: number;
+  totalCost: number;
+  layout: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    part: string;
+  }[];
+  sheetsNeeded: number;
 }
+
+const Page: React.FC = () => {
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [depth, setDepth] = useState('');
+  const [thickness, setThickness] = useState(2);
+  const [quantity, setQuantity] = useState('1');
+  const [laborCostFactor, setLaborCostFactor] = useState(1);
+  const [result, setResult] = useState<ResultType | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const dimensions = calculateDimensions(
+      Number(width),
+      Number(height),
+      Number(depth),
+      thickness
+    );
+    const { optimalSheet, totalMaterialCost, layout, sheetsNeeded } =
+      selectOptimalSheet(dimensions, thickness, Number(quantity));
+    const totalCost = calculateTotalCost(totalMaterialCost, laborCostFactor);
+    const costPerBox = totalCost / Number(quantity);
+
+    setResult({
+      dimensions,
+      optimalSheet,
+      totalMaterialCost,
+      costPerBox,
+      totalCost,
+      layout,
+      sheetsNeeded,
+    });
+  };
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">아크릴 박스 자동 견적</h1>
+      <form onSubmit={handleSubmit} className="mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label htmlFor="width" className="block mb-1">
+              가로 (mm)
+            </label>
+            <Input
+              type="number"
+              id="width"
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="height" className="block mb-1">
+              세로 (mm)
+            </label>
+            <Input
+              type="number"
+              id="height"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="depth" className="block mb-1">
+              높이 (mm)
+            </label>
+            <Input
+              type="number"
+              id="depth"
+              value={depth}
+              onChange={(e) => setDepth(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="thickness" className="block mb-1">
+              두께
+            </label>
+            <Select
+              id="thickness"
+              value={thickness}
+              onValueChange={(value) => setThickness(Number(value))}
+              options={thicknessOptions}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="quantity" className="block mb-1">
+              수량
+            </label>
+            <Input
+              type="number"
+              id="quantity"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="laborCostFactor" className="block mb-1">
+              인건비 계수
+            </label>
+            <Select
+              id="laborCostFactor"
+              value={laborCostFactor}
+              onValueChange={(value) => setLaborCostFactor(Number(value))}
+              options={laborCostFactorOptions}
+            />
+          </div>
+        </div>
+
+        <Button type="submit">견적 계산하기</Button>
+      </form>
+      {result && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">견적 결과</h2>
+          <VisualFeedback
+            dimensions={result.dimensions}
+            optimalSheet={result.optimalSheet}
+            layout={result.layout}
+            sheetsNeeded={result.sheetsNeeded}
+          />
+          <div className="mt-4">
+            <p>
+              선택된 아크릴 판: {result.optimalSheet.name} (
+              {result.optimalSheet.width} x {result.optimalSheet.height} mm)
+            </p>
+            <p>필요한 아크릴 판 수: {result.sheetsNeeded}장</p>
+            <p>총 재료 비용: {result.totalMaterialCost.toFixed(2)} 원</p>
+            <p>인건비 계수: {laborCostFactor}배</p>
+            <p>총 금액 (인건비 포함): {result.totalCost.toFixed(2)} 원</p>
+            <p>박스 당 가격: {result.costPerBox.toFixed(2)} 원</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Page;
