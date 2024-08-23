@@ -26,14 +26,6 @@ const colors = [
   '#85C1E9',
 ];
 
-const partLabels: any = {
-  top: '상단',
-  bottom: '하단',
-  left: '왼쪽',
-  right: '오른쪽',
-  front: '앞면',
-  back: '뒷면',
-};
 export const VisualFeedback: React.FC<VisualFeedbackProps> = ({
   dimensions,
   optimalSheet,
@@ -76,17 +68,11 @@ export const VisualFeedback: React.FC<VisualFeedbackProps> = ({
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const label = `${partLabels[item.part]}`;
       const size = `${item.width}x${item.height}`;
-      ctx.fillText(
-        label,
-        (item.x + item.width / 2) * scale,
-        (item.y + item.height / 2 - 10) * scale
-      );
       ctx.fillText(
         size,
         (item.x + item.width / 2) * scale,
-        (item.y + item.height / 2 + 10) * scale
+        (item.y + item.height / 2) * scale
       );
     });
 

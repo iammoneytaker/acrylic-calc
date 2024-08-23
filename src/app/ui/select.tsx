@@ -23,7 +23,7 @@ export const Select: React.FC<SelectProps> = ({
       id={id}
       value={value}
       onChange={(e) => onValueChange(e.target.value)}
-      className="w-full border border-gray-300 rounded px-2 py-1"
+      className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>

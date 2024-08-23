@@ -96,7 +96,7 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
       <h1 className="text-2xl font-bold mb-4">아크릴 박스 자동 견적</h1>
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -194,10 +194,10 @@ const Page: React.FC = () => {
               {result.optimalSheet.width} x {result.optimalSheet.height} mm)
             </p>
             <p>필요한 아크릴 판 수: {result.sheetsNeeded}장</p>
-            <p>총 재료 비용: {result.totalMaterialCost.toFixed(2)} 원</p>
+            <p>총 재료 비용: {Math.round(result.totalMaterialCost)} 원</p>
             <p>인건비 계수: {laborCostFactor}배</p>
-            <p>총 금액 (인건비 포함): {result.totalCost.toFixed(2)} 원</p>
-            <p>박스 당 가격: {result.costPerBox.toFixed(2)} 원</p>
+            <p>총 금액 (인건비 포함): {Math.round(result.totalCost)} 원</p>
+            <p>박스 당 가격: {Math.round(result.costPerBox)} 원</p>
           </div>
         </div>
       )}
