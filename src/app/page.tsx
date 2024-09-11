@@ -33,12 +33,7 @@ const thicknessOptions = [
   { value: 30, label: '30T' },
 ];
 
-const laborCostFactorOptions = [
-  { value: 1, label: '1배 (기본)' },
-  { value: 1.5, label: '1.5배' },
-  { value: 1.8, label: '1.8배' },
-  { value: 2, label: '2배' },
-];
+// laborCostFactorOptions 배열 제거
 
 interface ResultType {
   dimensions: { [key: string]: { width: number; height: number } };
@@ -67,7 +62,7 @@ const Page: React.FC = () => {
   const [depth, setDepth] = useState('');
   const [thickness, setThickness] = useState(2);
   const [quantity, setQuantity] = useState('1');
-  const [laborCostFactor, setLaborCostFactor] = useState(1);
+  const [laborCostFactor, setLaborCostFactor] = useState('1'); // 문자열로 변경
   const [result, setResult] = useState<ResultType | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -81,7 +76,10 @@ const Page: React.FC = () => {
     );
     const { optimalSheet, totalMaterialCost, layout, sheetsNeeded } =
       selectOptimalSheet(dimensions, thickness, Number(quantity));
-    const totalCost = calculateTotalCost(totalMaterialCost, laborCostFactor);
+    const totalCost = calculateTotalCost(
+      totalMaterialCost,
+      Number(laborCostFactor)
+    ); // Number로 변환
     const costPerBox = totalCost / Number(quantity);
 
     setResult({
@@ -168,11 +166,15 @@ const Page: React.FC = () => {
             <label htmlFor="laborCostFactor" className="block mb-1">
               인건비 계수
             </label>
-            <Select
+            <input
+              type="number"
               id="laborCostFactor"
               value={laborCostFactor}
-              onValueChange={(value) => setLaborCostFactor(Number(value))}
-              options={laborCostFactorOptions}
+              onChange={(e) => setLaborCostFactor(e.target.value)}
+              required
+              min="0.1"
+              step="0.1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
