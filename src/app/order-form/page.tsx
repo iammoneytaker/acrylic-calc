@@ -9,13 +9,13 @@ const thicknessOptions = [
 ];
 
 const specificationOptions = [
-  '36판',
-  '대36판',
-  '대12판',
-  '45판',
-  '대45판',
-  '대46판',
-  '대48판',
+  '3*6판',
+  '대3*6판',
+  '대1*2판',
+  '4*5판',
+  '대4*5판',
+  '대4*6판',
+  '대4*8판',
 ];
 
 const surfaceTreatmentOptions = [
