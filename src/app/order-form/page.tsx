@@ -9,7 +9,13 @@ const thicknessOptions = [
 ];
 
 const specificationOptions = [
-  '36판', '대36판', '대12판', '45판', '대45판', '대46판', '대48판'
+  '36판',
+  '대36판',
+  '대12판',
+  '45판',
+  '대45판',
+  '대46판',
+  '대48판',
 ];
 
 interface Item {
@@ -70,22 +76,40 @@ const OrderFormPage: React.FC = () => {
     }
   };
 
+  const handleGenerateJPG = async () => {
+    if (printRef.current) {
+      const canvas = await html2canvas(printRef.current);
+      const imgData = canvas.toDataURL('image/jpeg', 1.0); // JPG 형식으로 변환
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = 'order_form.jpg'; // 다운로드할 파일 이름
+      link.click();
+    }
+  };
+
   return (
     <div className="p-4 bg-white text-gray-900">
       <h1 className="text-2xl font-bold mb-4">재료 주문서 작성</h1>
       <form className="mb-8">
         {items.map((item, index) => (
-          <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4"
+          >
             <input
               type="text"
               value={item.productName}
-              onChange={(e) => handleChangeItem(index, 'productName', e.target.value)}
+              onChange={(e) =>
+                handleChangeItem(index, 'productName', e.target.value)
+              }
               placeholder="품명"
               className="border border-gray-300 rounded px-2 py-1 text-black"
             />
             <select
               value={item.thickness}
-              onChange={(e) => handleChangeItem(index, 'thickness', e.target.value)}
+              onChange={(e) =>
+                handleChangeItem(index, 'thickness', e.target.value)
+              }
               className="border border-gray-300 rounded px-2 py-1"
             >
               {thicknessOptions.map((thickness) => (
@@ -96,7 +120,9 @@ const OrderFormPage: React.FC = () => {
             </select>
             <select
               value={item.specification}
-              onChange={(e) => handleChangeItem(index, 'specification', e.target.value)}
+              onChange={(e) =>
+                handleChangeItem(index, 'specification', e.target.value)
+              }
               className="border border-gray-300 rounded px-2 py-1"
             >
               {specificationOptions.map((spec) => (
@@ -108,7 +134,9 @@ const OrderFormPage: React.FC = () => {
             <input
               type="number"
               value={item.quantity}
-              onChange={(e) => handleChangeItem(index, 'quantity', e.target.value)}
+              onChange={(e) =>
+                handleChangeItem(index, 'quantity', e.target.value)
+              }
               placeholder="수량"
               className="border border-gray-300 rounded px-2 py-1 text-black"
             />
@@ -128,6 +156,13 @@ const OrderFormPage: React.FC = () => {
             className="bg-blue-500 text-white rounded px-4 py-2"
           >
             PDF로 출력
+          </button>
+          <button
+            type="button"
+            onClick={handleGenerateJPG}
+            className="bg-blue-500 text-white rounded px-4 py-2"
+          >
+            JPG로 출력
           </button>
         </div>
       </form>
@@ -177,23 +212,65 @@ const OrderFormPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 8 }).map((_, index) => {
-              const item = items[index] || { productName: '', thickness: 0, specification: '', quantity: 0 };
-            {items.map((item, index) => (
-              <tr key={index}>
-                <td className="border px-2 py-1">{item.productName}</td>
-                <td className="border px-2 py-1">{item.thickness}T</td>
-                <td className="border px-2 py-1">{item.specification}</td>
-                <td className="border px-2 py-1">{item.quantity}</td>
-              </tr>
-            ))}
+            {Array.from({ length: 10 }).map((_, index) => {
+              const item = items[index] || {
+                productName: '',
+                thickness: 0,
+                specification: '',
+                quantity: 0,
+              };
+              return (
+                <tr key={index}>
+                  <td className="border px-2" style={{ 
+                    height: '35px', 
+                    verticalAlign: 'middle',
+                    lineHeight: '35px',
+                    textAlign: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {item.productName || ' '}
+                  </td>
+                  <td className="border px-2" style={{ 
+                    height: '35px', 
+                    verticalAlign: 'middle',
+                    lineHeight: '35px',
+                    textAlign: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {item.thickness === 0 ? ' ' : item.thickness + 'T'}
+                  </td>
+                  <td className="border px-2" style={{ 
+                    height: '35px', 
+                    verticalAlign: 'middle',
+                    lineHeight: '35px',
+                    textAlign: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {item.specification || ' '}
+                  </td>
+                  <td className="border px-2" style={{ 
+                    height: '35px', 
+                    verticalAlign: 'middle',
+                    lineHeight: '35px',
+                    textAlign: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {item.quantity === 0 ? ' ' : item.quantity}
+                  </td>
+                </tr>
+              );
+            })}
+            <tr>
+              <td
+                colSpan={4}
+                className="border px-2 py-1 text-left"
+                style={{ height: '35px' }}
+              >
+                <strong>특이사항:</strong> {specialNotes || ' '}
+              </td>
+            </tr>
           </tbody>
         </table>
-        {specialNotes && (
-          <p className="mt-4">
-            <strong>특이사항:</strong> {specialNotes}
-          </p>
-        )}
       </div>
     </div>
   );
