@@ -110,12 +110,22 @@ const OrderFormPage: React.FC = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handleGeneratePDF = async () => {
-    if (printRef.current) {
-      const canvas = await html2canvas(printRef.current, {
+    const element = document.getElementById('pdf-content');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        scrollY: -window.scrollY,
-        windowHeight: document.documentElement.offsetHeight
+        logging: true,
+        allowTaint: true,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('pdf-content');
+          if (clonedElement instanceof HTMLElement) {
+            const styles = window.getComputedStyle(element);
+            clonedElement.style.fontFamily = styles.fontFamily;
+          }
+        }
       });
       const imgData = canvas.toDataURL('image/png');
       // A4 크기 설정 (단위: mm)
@@ -129,6 +139,8 @@ const OrderFormPage: React.FC = () => {
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('order_form.pdf');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -330,6 +342,7 @@ const OrderFormPage: React.FC = () => {
 
       {/* A4 미리보기 */}
       <div 
+        id="pdf-content"
         className="print-content mx-auto bg-white shadow-lg" 
         ref={printRef}
         style={{ 
@@ -355,14 +368,58 @@ const OrderFormPage: React.FC = () => {
         </div>
 
         {/* 주문 테이블 */}
-        <table className="w-full mb-6">
+        <table className="w-full mb-6" style={{ 
+          borderCollapse: 'collapse', 
+          borderSpacing: 0,
+          fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif'
+        }}>
           <thead>
             <tr>
-              <th className="border px-2 py-2 bg-gray-50 text-base">제품명</th>
-              <th className="border px-2 py-2 bg-gray-50 text-base">두께</th>
-              <th className="border px-2 py-2 bg-gray-50 text-base">규격</th>
-              <th className="border px-2 py-2 bg-gray-50 text-base">표면처리</th>
-              <th className="border px-2 py-2 bg-gray-50 text-base">수량</th>
+              <th className="border bg-gray-50 text-base" style={{ 
+                height: '45px',
+                padding: '0 8px',
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                textAlign: 'center'
+              }}>
+                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>제품명</span>
+              </th>
+              <th className="border bg-gray-50 text-base" style={{ 
+                height: '45px',
+                padding: '0 8px',
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                textAlign: 'center'
+              }}>
+                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>두께</span>
+              </th>
+              <th className="border bg-gray-50 text-base" style={{ 
+                height: '45px',
+                padding: '0 8px',
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                textAlign: 'center'
+              }}>
+                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>규격</span>
+              </th>
+              <th className="border bg-gray-50 text-base" style={{ 
+                height: '45px',
+                padding: '0 8px',
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                textAlign: 'center'
+              }}>
+                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>표면처리</span>
+              </th>
+              <th className="border bg-gray-50 text-base" style={{ 
+                height: '45px',
+                padding: '0 8px',
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                textAlign: 'center'
+              }}>
+                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>수량</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -379,53 +436,63 @@ const OrderFormPage: React.FC = () => {
                 <tr key={index}>
                   <td className="border" style={{ 
                     height: '45px',
-                    lineHeight: '45px',
-                    padding: '0',
+                    padding: '0 8px',
+                    display: 'table-cell',
+                    verticalAlign: 'middle',
                     textAlign: 'center',
-                    fontSize: '14px',
-                    verticalAlign: 'middle'
+                    fontSize: '14px'
                   }}>
-                    {item.productName || ' '}
+                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
+                      {item.productName || ' '}
+                    </span>
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
-                    lineHeight: '45px',
-                    padding: '0',
+                    padding: '0 8px',
+                    display: 'table-cell',
+                    verticalAlign: 'middle',
                     textAlign: 'center',
-                    fontSize: '14px',
-                    verticalAlign: 'middle'
+                    fontSize: '14px'
                   }}>
-                    {item.thickness === 0 ? ' ' : item.thickness + 'T'}
+                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
+                      {item.thickness === 0 ? ' ' : item.thickness + 'T'}
+                    </span>
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
-                    lineHeight: '45px',
-                    padding: '0',
+                    padding: '0 8px',
+                    display: 'table-cell',
+                    verticalAlign: 'middle',
                     textAlign: 'center',
-                    fontSize: '14px',
-                    verticalAlign: 'middle'
+                    fontSize: '14px'
                   }}>
-                    {item.specification || ' '}
+                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
+                      {item.specification || ' '}
+                    </span>
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
-                    lineHeight: '45px',
-                    padding: '0',
+                    padding: '0 8px',
+                    display: 'table-cell',
+                    verticalAlign: 'middle',
                     textAlign: 'center',
-                    fontSize: '14px',
-                    verticalAlign: 'middle'
+                    fontSize: '14px'
                   }}>
-                    {item.surfaceTreatment || ' '}
+                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
+                      {item.surfaceTreatment || ' '}
+                    </span>
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
-                    lineHeight: '45px',
-                    padding: '0',
+                    padding: '0 8px',
+                    display: 'table-cell',
+                    verticalAlign: 'middle',
                     textAlign: 'center',
-                    fontSize: '14px',
-                    verticalAlign: 'middle'
+                    fontSize: '14px'
                   }}>
-                    {item.quantity === 0 ? ' ' : item.quantity}
+                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
+                      {item.quantity === 0 ? ' ' : item.quantity}
+                    </span>
                   </td>
                 </tr>
               );
