@@ -381,45 +381,35 @@ const OrderFormPage: React.FC = () => {
                 display: 'table-cell',
                 verticalAlign: 'middle',
                 textAlign: 'center'
-              }}>
-                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>제품명</span>
-              </th>
+              }}>제품명</th>
               <th className="border bg-gray-50 text-base" style={{ 
                 height: '45px',
                 padding: '0 8px',
                 display: 'table-cell',
                 verticalAlign: 'middle',
                 textAlign: 'center'
-              }}>
-                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>두께</span>
-              </th>
+              }}>두께</th>
               <th className="border bg-gray-50 text-base" style={{ 
                 height: '45px',
                 padding: '0 8px',
                 display: 'table-cell',
                 verticalAlign: 'middle',
                 textAlign: 'center'
-              }}>
-                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>규격</span>
-              </th>
+              }}>규격</th>
               <th className="border bg-gray-50 text-base" style={{ 
                 height: '45px',
                 padding: '0 8px',
                 display: 'table-cell',
                 verticalAlign: 'middle',
                 textAlign: 'center'
-              }}>
-                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>표면처리</span>
-              </th>
+              }}>표면처리</th>
               <th className="border bg-gray-50 text-base" style={{ 
                 height: '45px',
                 padding: '0 8px',
                 display: 'table-cell',
                 verticalAlign: 'middle',
                 textAlign: 'center'
-              }}>
-                <span style={{ display: 'block', transform: 'translateY(-2px)' }}>수량</span>
-              </th>
+              }}>수량</th>
             </tr>
           </thead>
           <tbody>
@@ -442,9 +432,7 @@ const OrderFormPage: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '14px'
                   }}>
-                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
-                      {item.productName || ' '}
-                    </span>
+                    {item.productName || ' '}
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
@@ -454,9 +442,7 @@ const OrderFormPage: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '14px'
                   }}>
-                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
-                      {item.thickness === 0 ? ' ' : item.thickness + 'T'}
-                    </span>
+                    {item.thickness === 0 ? ' ' : item.thickness + 'T'}
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
@@ -466,9 +452,7 @@ const OrderFormPage: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '14px'
                   }}>
-                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
-                      {item.specification || ' '}
-                    </span>
+                    {item.specification || ' '}
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
@@ -478,9 +462,7 @@ const OrderFormPage: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '14px'
                   }}>
-                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
-                      {item.surfaceTreatment || ' '}
-                    </span>
+                    {item.surfaceTreatment || ' '}
                   </td>
                   <td className="border" style={{ 
                     height: '45px',
@@ -490,9 +472,7 @@ const OrderFormPage: React.FC = () => {
                     textAlign: 'center',
                     fontSize: '14px'
                   }}>
-                    <span style={{ display: 'block', transform: 'translateY(-2px)' }}>
-                      {item.quantity === 0 ? ' ' : item.quantity}
-                    </span>
+                    {item.quantity === 0 ? ' ' : item.quantity}
                   </td>
                 </tr>
               );
