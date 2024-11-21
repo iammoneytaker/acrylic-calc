@@ -11,11 +11,11 @@ const thicknessOptions = [
 const specificationOptions = [
   '3*6판',
   '대3*6판',
-  '대1*2판',
+  '1*2판',
   '4*5판',
   '대4*5판',
-  '대4*6판',
-  '대4*8판',
+  '4*6판',
+  '4*8판',
 ];
 
 const surfaceTreatmentOptions = [
