@@ -18,45 +18,91 @@ const specificationOptions = [
   '대48판',
 ];
 
+const surfaceTreatmentOptions = [
+  '매끈하게',
+  '단면 아스텔',
+  '양면 아스텔',
+  '단면 사틴',
+  '양면 사틴',
+];
+
+interface BusinessInfo {
+  name: string;
+  info: string;
+}
+
+const senderOptions: BusinessInfo[] = [
+  {
+    name: '미광산업',
+    info: '아크릴 레이저 가공/다이아 컷팅/아크릴 경첩 및 사출제품 업체\n(우)100-194 서울특별시 중구 을지로 33길 34-4\nTEL: 02)2265-2474 / Fax: 02)2263-5975'
+  },
+  {
+    name: '아크릴맛집',
+    info: '사업자등록번호: 382-75-00268 \n주소: 서울특별시 중구 을지로33길 33, 청자빌딩 201호\n연락처: 010-2410-2474'
+  }
+];
+
 interface Item {
   productName: string;
   thickness: number;
   specification: string;
+  surfaceTreatment: string;
+  surfaceTreatmentType: string;
   quantity: number;
 }
 
 const OrderFormPage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([
-    { productName: '', thickness: 1.3, specification: '36판', quantity: 1 },
+    { 
+      productName: '', 
+      thickness: 1.3, 
+      specification: '36판',
+      surfaceTreatment: '',
+      surfaceTreatmentType: '',
+      quantity: 1 
+    },
   ]);
 
   const [recipient, setRecipient] = useState('청구산업');
-  const [sender, setSender] = useState('미광산업');
-  const [date, setDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().substr(0, 10).replace(/-/g, '.'); // YYYY.MM.DD 형식
-  });
+  const [sender, setSender] = useState(senderOptions[0].name);
+  const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [specialNotes, setSpecialNotes] = useState('');
 
   const handleAddItem = () => {
     setItems([
       ...items,
-      { productName: '', thickness: 1.3, specification: '36판', quantity: 1 },
+      { 
+        productName: '', 
+        thickness: 1.3, 
+        specification: '36판',
+        surfaceTreatment: '',
+        surfaceTreatmentType: '',
+        quantity: 1 
+      },
     ]);
   };
 
   const handleChangeItem = (
     index: number,
     field: keyof Item,
-    value: string | number
+    value: string | number,
+    isCustomInput: boolean = false
   ) => {
     const newItems = [...items];
-    if (field === 'thickness') {
-      newItems[index][field] = Number(value); // 두께는 숫자로 변환
-    } else if (field === 'quantity') {
-      newItems[index][field] = Number(value); // 수량도 숫자로 변환
+    if (field === 'thickness' || field === 'quantity') {
+      newItems[index][field] = Number(value);
+    } else if (field === 'surfaceTreatment') {
+      if (isCustomInput) {
+        // 직접 입력 시에는 입력된 값을 저장하고 custom 상태를 유지
+        newItems[index].surfaceTreatmentType = 'custom';
+        newItems[index].surfaceTreatment = value as string;
+      } else {
+        // select 변경 시
+        newItems[index].surfaceTreatmentType = value as string;
+        newItems[index].surfaceTreatment = value === 'custom' ? '' : value as string;
+      }
     } else {
-      newItems[index][field] = value as string; // 나머지는 문자열
+      newItems[index][field] = value as string;
     }
     setItems(newItems);
   };
@@ -65,150 +111,258 @@ const OrderFormPage: React.FC = () => {
 
   const handleGeneratePDF = async () => {
     if (printRef.current) {
-      const canvas = await html2canvas(printRef.current);
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        scrollY: -window.scrollY,
+        windowHeight: document.documentElement.offsetHeight
+      });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF();
-      const imgProps = pdf.getImageProperties(imgData);
+      // A4 크기 설정 (단위: mm)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('order_form.pdf');
     }
   };
 
-  const handleGenerateJPG = async () => {
+  const handleDownloadImage = async () => {
     if (printRef.current) {
-      const canvas = await html2canvas(printRef.current);
-      const imgData = canvas.toDataURL('image/jpeg', 1.0); // JPG 형식으로 변환
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const element = clonedDoc.querySelector('.print-content') as HTMLElement;
+          if (element) {
+            element.style.height = '297mm';
+            element.style.width = '210mm';
+          }
+        }
+      });
+
+      const imageData = canvas.toDataURL('image/jpeg', 1.0);
       const link = document.createElement('a');
-      link.href = imgData;
-      link.download = 'order_form.jpg'; // 다운로드할 파일 이름
+      link.download = '재료주문서.jpg';
+      link.href = imageData;
       link.click();
     }
   };
 
   return (
-    <div className="p-4 bg-white text-gray-900">
+    <div className="p-4 bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">재료 주문서 작성</h1>
-      <form className="mb-8">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4"
-          >
+      
+      {/* 입력 폼 */}
+      <div className="mb-4 space-y-4">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              받는 사람
+            </label>
             <input
               type="text"
-              value={item.productName}
-              onChange={(e) =>
-                handleChangeItem(index, 'productName', e.target.value)
-              }
-              placeholder="품명"
-              className="border border-gray-300 rounded px-2 py-1 text-black"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="받는 사람을 입력하세요"
             />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              보내는 사람
+            </label>
             <select
-              value={item.thickness}
-              onChange={(e) =>
-                handleChangeItem(index, 'thickness', e.target.value)
-              }
-              className="border border-gray-300 rounded px-2 py-1"
+              value={sender}
+              onChange={(e) => setSender(e.target.value)}
+              className="w-full p-2 border rounded"
             >
-              {thicknessOptions.map((thickness) => (
-                <option key={thickness} value={thickness}>
-                  {thickness}T
+              {senderOptions.map((option) => (
+                <option key={option.name} value={option.name}>
+                  {option.name}
                 </option>
               ))}
             </select>
-            <select
-              value={item.specification}
-              onChange={(e) =>
-                handleChangeItem(index, 'specification', e.target.value)
-              }
-              className="border border-gray-300 rounded px-2 py-1"
-            >
-              {specificationOptions.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
+          </div>
+        </div>
+        
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              날짜
+            </label>
             <input
-              type="number"
-              value={item.quantity}
-              onChange={(e) =>
-                handleChangeItem(index, 'quantity', e.target.value)
-              }
-              placeholder="수량"
-              className="border border-gray-300 rounded px-2 py-1 text-black"
+              type="date"
+              value={orderDate}
+              onChange={(e) => setOrderDate(e.target.value)}
+              className="w-full p-2 border rounded"
             />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              특이사항
+            </label>
+            <textarea
+              value={specialNotes}
+              onChange={(e) => setSpecialNotes(e.target.value)}
+              className="w-full p-2 border rounded"
+              rows={3}
+              placeholder="특이사항을 입력하세요."
+            />
+          </div>
+        </div>
+
+        {items.map((item, index) => (
+          <div key={index} className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                품명
+              </label>
+              <input
+                type="text"
+                value={item.productName}
+                onChange={(e) =>
+                  handleChangeItem(index, 'productName', e.target.value)
+                }
+                className="w-full p-2 border rounded"
+                placeholder="품명을 입력하세요"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                두께
+              </label>
+              <select
+                value={item.thickness}
+                onChange={(e) =>
+                  handleChangeItem(index, 'thickness', e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              >
+                {thicknessOptions.map((thickness) => (
+                  <option key={thickness} value={thickness}>
+                    {thickness}T
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                규격
+              </label>
+              <select
+                value={item.specification}
+                onChange={(e) =>
+                  handleChangeItem(index, 'specification', e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              >
+                {specificationOptions.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                표면처리
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={items[index].surfaceTreatmentType || items[index].surfaceTreatment}
+                  onChange={(e) =>
+                    handleChangeItem(index, 'surfaceTreatment', e.target.value)
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">선택하세요</option>
+                  {surfaceTreatmentOptions.map((treatment) => (
+                    <option key={treatment} value={treatment}>
+                      {treatment}
+                    </option>
+                  ))}
+                  <option value="custom">직접 입력</option>
+                </select>
+                {items[index].surfaceTreatmentType === 'custom' && (
+                  <input
+                    type="text"
+                    value={items[index].surfaceTreatment}
+                    onChange={(e) =>
+                      handleChangeItem(index, 'surfaceTreatment', e.target.value, true)
+                    }
+                    className="w-full p-2 border rounded"
+                    placeholder="표면처리를 입력하세요"
+                  />
+                )}
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                수량
+              </label>
+              <input
+                type="number"
+                value={item.quantity}
+                onChange={(e) =>
+                  handleChangeItem(index, 'quantity', e.target.value)
+                }
+                className="w-full p-2 border rounded"
+                placeholder="수량을 입력하세요"
+              />
+            </div>
           </div>
         ))}
         <button
           type="button"
           onClick={handleAddItem}
-          className="bg-blue-500 text-white rounded px-4 py-2"
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           항목 추가
         </button>
-        <div className="mt-4 flex space-x-4">
-          <button
-            type="button"
-            onClick={handleGeneratePDF}
-            className="bg-blue-500 text-white rounded px-4 py-2"
-          >
-            PDF로 출력
-          </button>
-          <button
-            type="button"
-            onClick={handleGenerateJPG}
-            className="bg-blue-500 text-white rounded px-4 py-2"
-          >
-            JPG로 출력
-          </button>
+      </div>
+
+      {/* A4 미리보기 */}
+      <div 
+        className="print-content mx-auto bg-white shadow-lg" 
+        ref={printRef}
+        style={{ 
+          width: '210mm', 
+          height: '297mm', 
+          padding: '20mm',
+          position: 'relative'
+        }}
+      >
+        {/* 주문서 제목 */}
+        <h2 className="text-2xl font-bold text-center mb-8">재료 주문서</h2>
+        
+        {/* 받는 사람 */}
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <p className="text-lg">
+              <strong>받는 사람:</strong> {recipient}
+            </p>
+          </div>
+          <div className="text-right whitespace-pre-line text-sm">
+            {senderOptions.find(opt => opt.name === sender)?.info}
+          </div>
         </div>
-      </form>
 
-      {/* 날짜 입력 필드 추가 */}
-      <div className="mb-4">
-        <label className="block mb-1">날짜</label>
-        <input
-          type="date"
-          value={date.replace(/\./g, '-')} // YYYY-MM-DD 형식으로 변환
-          onChange={(e) => setDate(e.target.value.replace(/-/g, '.'))} // YYYY.MM.DD 형식으로 변환
-          className="border border-gray-300 rounded px-2 py-1 w-full"
-        />
-      </div>
-
-      {/* 세부사항 입력 필드 추가 */}
-      <div className="mb-4">
-        <label className="block mb-1">특이사항</label>
-        <textarea
-          value={specialNotes}
-          onChange={(e) => setSpecialNotes(e.target.value)}
-          className="border border-gray-300 rounded px-2 py-1 w-full"
-          rows={3}
-          placeholder="특이사항을 입력하세요."
-        />
-      </div>
-
-      {/* 출력할 주문서 미리보기 */}
-      <div ref={printRef} className="p-4 border border-gray-300">
-        <h2 className="text-xl font-bold mb-2">재료 주문서</h2>
-        <p>
-          <strong>받는 사람:</strong> {recipient}
-        </p>
-        <p>
-          <strong>보내는 사람:</strong> {sender}
-        </p>
-        <p>
-          <strong>날짜:</strong> {date}
-        </p>
-        <table className="w-full mt-4 border-collapse">
+        {/* 주문 테이블 */}
+        <table className="w-full mb-6">
           <thead>
             <tr>
-              <th className="border px-2 py-1">품명</th>
-              <th className="border px-2 py-1">두께</th>
-              <th className="border px-2 py-1">규격</th>
-              <th className="border px-2 py-1">수량</th>
+              <th className="border px-2 py-2 bg-gray-50 text-base">제품명</th>
+              <th className="border px-2 py-2 bg-gray-50 text-base">두께</th>
+              <th className="border px-2 py-2 bg-gray-50 text-base">규격</th>
+              <th className="border px-2 py-2 bg-gray-50 text-base">표면처리</th>
+              <th className="border px-2 py-2 bg-gray-50 text-base">수량</th>
             </tr>
           </thead>
           <tbody>
@@ -217,43 +371,59 @@ const OrderFormPage: React.FC = () => {
                 productName: '',
                 thickness: 0,
                 specification: '',
+                surfaceTreatment: '',
+                surfaceTreatmentType: '',
                 quantity: 0,
               };
               return (
                 <tr key={index}>
-                  <td className="border px-2" style={{ 
-                    height: '35px', 
-                    verticalAlign: 'middle',
-                    lineHeight: '35px',
+                  <td className="border" style={{ 
+                    height: '45px',
+                    lineHeight: '45px',
+                    padding: '0',
                     textAlign: 'center',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    verticalAlign: 'middle'
                   }}>
                     {item.productName || ' '}
                   </td>
-                  <td className="border px-2" style={{ 
-                    height: '35px', 
-                    verticalAlign: 'middle',
-                    lineHeight: '35px',
+                  <td className="border" style={{ 
+                    height: '45px',
+                    lineHeight: '45px',
+                    padding: '0',
                     textAlign: 'center',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    verticalAlign: 'middle'
                   }}>
                     {item.thickness === 0 ? ' ' : item.thickness + 'T'}
                   </td>
-                  <td className="border px-2" style={{ 
-                    height: '35px', 
-                    verticalAlign: 'middle',
-                    lineHeight: '35px',
+                  <td className="border" style={{ 
+                    height: '45px',
+                    lineHeight: '45px',
+                    padding: '0',
                     textAlign: 'center',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    verticalAlign: 'middle'
                   }}>
                     {item.specification || ' '}
                   </td>
-                  <td className="border px-2" style={{ 
-                    height: '35px', 
-                    verticalAlign: 'middle',
-                    lineHeight: '35px',
+                  <td className="border" style={{ 
+                    height: '45px',
+                    lineHeight: '45px',
+                    padding: '0',
                     textAlign: 'center',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    verticalAlign: 'middle'
+                  }}>
+                    {item.surfaceTreatment || ' '}
+                  </td>
+                  <td className="border" style={{ 
+                    height: '45px',
+                    lineHeight: '45px',
+                    padding: '0',
+                    textAlign: 'center',
+                    fontSize: '14px',
+                    verticalAlign: 'middle'
                   }}>
                     {item.quantity === 0 ? ' ' : item.quantity}
                   </td>
@@ -262,15 +432,51 @@ const OrderFormPage: React.FC = () => {
             })}
             <tr>
               <td
-                colSpan={4}
-                className="border px-2 py-1 text-left"
-                style={{ height: '35px' }}
+                colSpan={5}
+                className="border px-2 text-left"
+                style={{ 
+                  height: '80px',
+                  verticalAlign: 'top',
+                  padding: '10px'
+                }}
               >
                 <strong>특이사항:</strong> {specialNotes || ' '}
               </td>
             </tr>
           </tbody>
         </table>
+
+        {/* 특이사항과 날짜 */}
+        <div className="flex justify-between items-start mt-4">
+          <div className="flex-grow">
+          </div>
+          <div className="text-right">
+            {orderDate}
+          </div>
+        </div>
+
+        {/* 보내는 사람 */}
+        <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
+          <p className="text-lg">
+            <strong>보내는 사람:</strong> {sender}
+          </p>
+        </div>
+      </div>
+
+      {/* 다운로드 버튼 */}
+      <div className="mt-4 flex gap-4 justify-center">
+        <button
+          onClick={handleGeneratePDF}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          PDF 다운로드
+        </button>
+        <button
+          onClick={handleDownloadImage}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          JPG 다운로드
+        </button>
       </div>
     </div>
   );
