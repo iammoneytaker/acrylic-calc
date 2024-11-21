@@ -30,6 +30,16 @@ const NavBar: React.FC = () => {
         >
           판재 계산
         </Link>
+        <Link
+          href="/order-form"
+          className={`px-3 py-2 rounded-md ${
+            pathname === '/order-form'
+              ? 'bg-blue-500 text-white'
+              : 'text-gray-700 dark:text-gray-200'
+          }`}
+        >
+          재료 주문서
+        </Link>
       </nav>
     </header>
   );
