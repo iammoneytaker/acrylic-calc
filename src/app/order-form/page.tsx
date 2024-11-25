@@ -19,7 +19,7 @@ const specificationOptions = [
 ];
 
 const surfaceTreatmentOptions = [
-  '매끈하게',
+  '유광',
   '단면 아스텔',
   '양면 아스텔',
   '단면 사틴',
