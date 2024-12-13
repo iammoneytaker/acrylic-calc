@@ -82,6 +82,12 @@ const OrderFormPage: React.FC = () => {
     ]);
   };
 
+  // 삭제
+  const deleteItem = (index: number) => {
+    const updatedItems = items.filter((_, i) => i !== index);
+    setItems(updatedItems);
+  };
+
   const handleChangeItem = (
     index: number,
     field: keyof Item,
@@ -329,6 +335,7 @@ const OrderFormPage: React.FC = () => {
                 placeholder="수량을 입력하세요"
               />
             </div>
+            <button type="button" onClick={() => deleteItem(index)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">삭제</button>
           </div>
         ))}
         <button
@@ -339,6 +346,7 @@ const OrderFormPage: React.FC = () => {
           항목 추가
         </button>
       </div>
+
 
       {/* A4 미리보기 */}
       <div 
