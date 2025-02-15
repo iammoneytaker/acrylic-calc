@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
 import { Button } from '../ui/button';
@@ -48,13 +48,17 @@ interface ResultType {
 }
 
 const PanelSystemPage: React.FC = () => {
-  const [width, setWidth] = useState(() => localStorage.getItem('panel_width') || '');
-  const [height, setHeight] = useState(() => localStorage.getItem('panel_height') || '');
-  const [thickness, setThickness] = useState<number>(() => 
-    Number(localStorage.getItem('panel_thickness')) || 2
-  );
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [thickness, setThickness] = useState<number>(2);
   const [results, setResults] = useState<ResultType[]>([]);
   const [bestOption, setBestOption] = useState<ResultType | null>(null);
+
+  useEffect(() => {
+    setWidth(localStorage.getItem('panel_width') || '');
+    setHeight(localStorage.getItem('panel_height') || '');
+    setThickness(Number(localStorage.getItem('panel_thickness')) || 2);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
