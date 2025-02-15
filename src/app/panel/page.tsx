@@ -48,9 +48,11 @@ interface ResultType {
 }
 
 const PanelSystemPage: React.FC = () => {
-  const [width, setWidth] = useState('');
-  const [height, setHeight] = useState('');
-  const [thickness, setThickness] = useState<number>(2);
+  const [width, setWidth] = useState(() => localStorage.getItem('panel_width') || '');
+  const [height, setHeight] = useState(() => localStorage.getItem('panel_height') || '');
+  const [thickness, setThickness] = useState<number>(() => 
+    Number(localStorage.getItem('panel_thickness')) || 2
+  );
   const [results, setResults] = useState<ResultType[]>([]);
   const [bestOption, setBestOption] = useState<ResultType | null>(null);
 
@@ -85,6 +87,24 @@ const PanelSystemPage: React.FC = () => {
     setResults(sortedResults);
   };
 
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setWidth(value);
+    localStorage.setItem('panel_width', value);
+  };
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setHeight(value);
+    localStorage.setItem('panel_height', value);
+  };
+
+  const handleThicknessChange = (value: string) => {
+    const numValue = Number(value);
+    setThickness(numValue);
+    localStorage.setItem('panel_thickness', String(numValue));
+  };
+
   return (
     <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
       <h1 className="text-3xl font-bold mb-6">아크릴 판재 계산기</h1>
@@ -101,7 +121,7 @@ const PanelSystemPage: React.FC = () => {
               type="number"
               id="width"
               value={width}
-              onChange={(e) => setWidth(e.target.value)}
+              onChange={handleWidthChange}
               required
             />
           </div>
@@ -113,7 +133,7 @@ const PanelSystemPage: React.FC = () => {
               type="number"
               id="height"
               value={height}
-              onChange={(e) => setHeight(e.target.value)}
+              onChange={handleHeightChange}
               required
             />
           </div>
@@ -124,7 +144,7 @@ const PanelSystemPage: React.FC = () => {
             <Select
               id="thickness"
               value={thickness}
-              onValueChange={(value) => setThickness(Number(value))}
+              onValueChange={handleThicknessChange}
               options={thicknessOptions}
             />
           </div>
