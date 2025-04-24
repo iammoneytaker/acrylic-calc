@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const thicknessOptions = [
-  1.3, 1.5, 1.8, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 18, 20, 25, 30,
+  1.3, 1.5, 1.8, 2, 2.5, 3, 4, 4.5, 5, 6, 7, 8, 9, 10, 12, 15, 18, 20, 25, 30,
 ];
 
 const specificationOptions = [
