@@ -12,6 +12,7 @@ import {
 } from './utils/calculation';
 
 const thicknessOptions = [
+  { value: 1, label: '1T' },
   { value: 1.3, label: '1.3T' },
   { value: 1.5, label: '1.5T' },
   { value: 1.8, label: '1.8T' },
